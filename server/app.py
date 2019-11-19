@@ -146,7 +146,14 @@ def findRef(references):
         if len(refCode.Reference) > 0:
             data += findRef(refCode.Reference)
     return data
-        
+
+class ImportarFull(Resource):
+    def get(self):
+        responseCode = ""
+        for func in funtions:
+            responseCode += func.codeJS
+            if len(func.references) > 0:
+                responseCode += findRef(references)
 
 class ExportByURL(Resource):
     def get(self, id):
