@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, Response
 from flask_restful import Api, Resource
 import bcrypt
 import json
@@ -126,11 +126,6 @@ class Function(Resource):
         
         return toJson(function)
 
-    def patch(self):
-        pass
-
-    def delete(self):
-        pass
 
 def functionExist(name):
     if functions.find({"Name": name}).count() == 0:
@@ -143,13 +138,14 @@ def getFunction(name):
     return function
 
 def findRef(references):
-    if len(references) == 1:
-        return references.code
-    else:
-        elem = references.pop()
-        refCode = functions.find({"Name": elem})
+    data=""
+    for ref in references:
+        refCode = functions.find({"Name": ref})
+        data += refCode
+        
         if len(refCode.Reference) > 0:
-            findRef(refCode.Reference)
+            data += findRef(refCode.Reference)
+    return data
         
 
 class ExportByURL(Resource):
@@ -163,15 +159,9 @@ class ExportByURL(Resource):
             }
             return jsonify(retJson)
 
-        refList = []
-
-        if len(function.Reference) > 0:
-            data={}
-            for ref in function.Reference:
-                refCode = functions.find({"Name": ref})
-                data[ref] = refCode
+        codeResp = findRef(function.references)
             
-
+        return Response(codeResp, mimetype='text/javascript')
 
         
 
